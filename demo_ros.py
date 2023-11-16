@@ -63,14 +63,15 @@ def demo(event):
     scores = predictions_instances.scores
     classes = predictions_instances.pred_classes.tolist()
     masks = np.asarray(predictions_instances.pred_masks)
-    target_index = classes_name.index('shoe')
     target_mask = np.zeros(masks[0].shape, dtype=bool)
-    for class_index, score, mask in zip(classes, scores, masks):
-        if class_index == target_index:
-            print(class_index)
-            print(score)
-            print(mask.shape)
-            target_mask = target_mask | mask
+    for target_class_name in ['shoe']:
+        target_index = classes_name.index(target_class_name)
+        for class_index, score, mask in zip(classes, scores, masks):
+            if class_index == target_index:
+                print(class_index)
+                print(score)
+                print(mask.shape)
+                target_mask = target_mask | mask
     publish_image(target_mask)
     return
 
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     rospy.init_node('detic_ros_demo')
 
     _ = rospy.Subscriber('/camera/color/image_raw', sensor_msgs.msg.Image, color_image_callback)
-    target_mask_publisher = rospy.Publisher('/detic/target_mask', sensor_msgs.msg.Image, queue_size=10)
+    target_mask_publisher = rospy.Publisher('/detic/target_mask', sensor_msgs.msg.Image, queue_size=1)
     _ = rospy.Timer(rospy.Duration(1.0), demo)
 
     # 进入ROS循环
